@@ -1,18 +1,19 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import { useState, useEffect } from 'react';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import Link from '@mui/material/Link';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useDispatch } from 'react-redux';
+import { registerUser } from '../../features/user/userSlice';
+import { useUser } from '../../Hooks/useUser'; // Import the hook
+import EnterOtp from '../Popup/EnterOtp'; // Import the EnterOtp component
 
 function Copyright(props) {
   return (
@@ -27,20 +28,20 @@ function Copyright(props) {
   );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-
 const defaultTheme = createTheme();
 
 export default function SignUp() {
-
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
-
   const [password, setPassword] = useState('');
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isNameValid, setIsNameValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [showEnterOtp, setShowEnterOtp] = useState(false); // State to manage EnterOtp visibility
+
+  const { loading, sendOtp, verifyOtp } = useUser(); // Use the hook
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setIsEmailValid(validateEmail(email));
@@ -56,24 +57,36 @@ export default function SignUp() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
   const validateName = (name) => {
     const nameRegex = /^[a-zA-Z\s]+$/;
-    return nameRegex.test(name) && name.length > 0 ;
+    return nameRegex.test(name) && name.length > 0;
   };
 
   const validatePassword = (password) => {
     return password.length > 3 && password.length < 20;
   };
 
-
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-      name:data.get('name')
-    });
+    try {
+      const response = await sendOtp(email);
+      if (response.status === 'success') {
+        setShowEnterOtp(true); // Show the EnterOtp on success
+      }
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+    }
+  };
+
+  const handleVerifyOtp = async (email, otp) => {
+    try {
+      const response = await verifyOtp(email, otp);
+      return response;
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      throw error;
+    }
   };
 
   return (
@@ -96,64 +109,62 @@ export default function SignUp() {
           </Typography>
           <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-              <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="name"
-              label="name "
-              name="name"
-              autoComplete="Name"
-              autoFocus
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              error={!isNameValid && name.length > 0}
-              helperText={!isNameValid && name.length > 0 ? 'Invalid name format' : ''}
-            />
+              <Grid item xs={12}>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="name"
+                  label="Name"
+                  name="name"
+                  autoComplete="name"
+                  autoFocus
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  error={!isNameValid && name.length > 0}
+                  helperText={!isNameValid && name.length > 0 ? 'Invalid name format' : ''}
+                />
               </Grid>
               <Grid item xs={12}>
-              <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              error={!isEmailValid && email.length > 0}
-              helperText={!isEmailValid && email.length > 0 ? 'Invalid email format' : ''}
-            />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  error={!isEmailValid && email.length > 0}
+                  helperText={!isEmailValid && email.length > 0 ? 'Invalid email format' : ''}
+                />
               </Grid>
               <Grid item xs={12}>
-              <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              error={!isPasswordValid && password.length > 0}
-              helperText={!isPasswordValid && password.length > 0 ? 'Password must be between 4 to 20 characters' : ''}
-            />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type="password"
+                  id="password"
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  error={!isPasswordValid && password.length > 0}
+                  helperText={!isPasswordValid && password.length > 0 ? 'Password must be between 4 to 20 characters' : ''}
+                />
               </Grid>
-              
             </Grid>
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
-              disabled={!isFormValid}
+              disabled={!isFormValid || loading} // Disable the button during loading
             >
-              Sign Up
+              {loading ? 'Loading...' : 'Sign Up'}
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
@@ -165,6 +176,13 @@ export default function SignUp() {
           </Box>
         </Box>
         <Copyright sx={{ mt: 5 }} />
+        {showEnterOtp && (
+          <EnterOtp
+            email={email}
+            onClose={() => setShowEnterOtp(false)}
+            onVerifyOtp={handleVerifyOtp}
+          />
+        )} // Show the EnterOtp component when showEnterOtp is true
       </Container>
     </ThemeProvider>
   );

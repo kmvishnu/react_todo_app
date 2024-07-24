@@ -18,6 +18,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import MoreIcon from '@mui/icons-material/MoreVert';
+import { useSelector } from 'react-redux';
 
 const messages = [
   {
@@ -82,13 +83,16 @@ const StyledFab = styled(Fab)({
 });
 
 export default function Home() {
+  const name = useSelector((state) => state.user.name);
+  console.log("state",name);
   return (
     <React.Fragment>
       <CssBaseline />
       <Paper square sx={{ pb: '50px' }}>
         <Typography variant="h5" gutterBottom component="div" sx={{ p: 2, pb: 0, position: 'sticky', top: 0, bgcolor: 'white', zIndex: 1 }}>
-          Todos
+          {name}
         </Typography>
+     
         <List sx={{ mb: 2 }}>
           {messages.map(({ id, primary, secondary, person }) => (
             <React.Fragment key={id}>
