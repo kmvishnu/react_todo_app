@@ -11,12 +11,13 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useUser } from '../../Hooks/useUser';
 
 function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
       {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
+      <Link color="inherit" href="https://kmvishnu.github.io/angular-app">
         Webworms
       </Link>{' '}
       {new Date().getFullYear()}
@@ -33,6 +34,8 @@ export default function SignIn() {
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
+  const { loading, error, loginUser } = useUser(); 
+
 
   useEffect(() => {
     setIsEmailValid(validateEmail(email));
@@ -52,13 +55,23 @@ export default function SignIn() {
     return password.length > 3 && password.length < 20;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
+    const userData = {
       email: data.get('email'),
       password: data.get('password'),
-    });
+    
+    };
+    try {
+      const response = await loginUser(userData);
+      console.log("res",response);
+      // if (response.status === 'success') {
+      // }
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+    }
+   
   };
 
   return (

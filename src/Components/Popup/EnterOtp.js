@@ -1,19 +1,21 @@
 // src/components/Popup.js
 import React, { useState } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Button, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const Popup = ({ email, onClose, onVerifyOtp }) => {
   const [otp, setOtp] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState(null);
   const [verified, setVerified] = useState(false);
+  const navigate = useNavigate();
 
   const handleVerify = async () => {
     setVerifying(true);
     setError(null);
     try {
       const response = await onVerifyOtp(email, otp);
-      if (response.status === 'success') {
+      if (response.status === 'otpSuccess') {
         setVerified(true);
       } else {
         setError('OTP verification failed. Please try again.');
@@ -23,6 +25,11 @@ const Popup = ({ email, onClose, onVerifyOtp }) => {
     }
     setVerifying(false);
   };
+
+  const handleLoginRedirect = () => {
+    navigate('/login');
+  };
+
 
   return (
     <Dialog open={true} onClose={onClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
@@ -52,7 +59,7 @@ const Popup = ({ email, onClose, onVerifyOtp }) => {
       </DialogContent>
       <DialogActions>
         {verified ? (
-          <Button onClick={onClose} color="primary">
+          <Button onClick={handleLoginRedirect} color="primary">
             Go to Login
           </Button>
         ) : (

@@ -69,10 +69,17 @@ export default function SignUp() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const userData = {
+      email: data.get('email'),
+      password: data.get('password'),
+      name: data.get('name'),
+    };
+    dispatch(registerUser(userData));
     try {
       const response = await sendOtp(email);
       if (response.status === 'success') {
-        setShowEnterOtp(true); // Show the EnterOtp on success
+        setShowEnterOtp(true); 
       }
     } catch (error) {
       console.error('Error sending OTP:', error);
@@ -182,7 +189,7 @@ export default function SignUp() {
             onClose={() => setShowEnterOtp(false)}
             onVerifyOtp={handleVerifyOtp}
           />
-        )} // Show the EnterOtp component when showEnterOtp is true
+        )} 
       </Container>
     </ThemeProvider>
   );

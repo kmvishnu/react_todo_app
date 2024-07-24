@@ -1,14 +1,13 @@
 import axios from 'axios';
 import config from '../config';
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 export const useUser = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const userName = useSelector((state) => state.user.name);
-  const userEmail = useSelector((state) => state.user.email);
   const userPassword = useSelector((state) => state.user.password);
 
 
@@ -28,12 +27,12 @@ export const useUser = () => {
     }
   };
 
-  const verifyOtp = async (otp) => {
+  const verifyOtp = async (email,otp) => {
     setLoading(true);
     setError(null);
     const payload ={
       "name":userName,
-      "email":userEmail,
+      "email":email,
       "password":userPassword,
       "otp":otp
   }
@@ -47,12 +46,30 @@ export const useUser = () => {
       console.error('Verify OTP request failed:', error);
       return { status: 'error' };
     }
+ 
   };
 
+  const loginUser = async (user) => {
+    setLoading(true);
+    setError(null);
+    // const payload = { user };
+    try {
+      const response = await axios.post(`${config.apiBaseUrl}/v2/login`, user);
+      setLoading(false);
+      return response.data;
+      
+    } catch (error) {
+      setLoading(false);
+      setError('Failed to send OTP. Please try again.');
+      console.error('Send OTP request failed:', error);
+      return { status: 'error' };
+    }
+  };
   return {
     loading,
     error,
     sendOtp,
     verifyOtp,
+    loginUser
   };
 };
