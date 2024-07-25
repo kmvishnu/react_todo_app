@@ -1,10 +1,11 @@
-// features/user/userSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   name: '',
   email: '',
   password: '',
+  token: localStorage.getItem('token') || null,
+  user: localStorage.getItem('user') || null,
 };
 
 const userSlice = createSlice({
@@ -16,9 +17,17 @@ const userSlice = createSlice({
       state.email = action.payload.email;
       state.password = action.payload.password;
     },
+    setToken: (state, action) => {
+      state.token = action.payload.token;
+      state.user = action.payload.user;
+    },
+    clearToken: (state) => {
+      state.token = null;
+      state.user = null;
+    },
   },
 });
 
-export const { registerUser } = userSlice.actions;
+export const { registerUser, setToken, clearToken } = userSlice.actions;
 
 export default userSlice.reducer;

@@ -76,7 +76,7 @@ const StyledFab = styled(Fab)({
   left: 0,
   right: 0,
   margin: '0 auto',
-  backgroundColor:  '#ffd740',
+  backgroundColor: '#ffd740',
   '& svg': {
     fontSize: '2rem', // Increase the size of the icon
   },
@@ -84,7 +84,6 @@ const StyledFab = styled(Fab)({
 
 export default function Home() {
   const name = useSelector((state) => state.user.name);
-  console.log("state",name);
   return (
     <React.Fragment>
       <CssBaseline />
@@ -92,7 +91,7 @@ export default function Home() {
         <Typography variant="h5" gutterBottom component="div" sx={{ p: 2, pb: 0, position: 'sticky', top: 0, bgcolor: 'white', zIndex: 1 }}>
           {name}
         </Typography>
-     
+
         <List sx={{ mb: 2 }}>
           {messages.map(({ id, primary, secondary, person }) => (
             <React.Fragment key={id}>
@@ -123,7 +122,7 @@ export default function Home() {
           <IconButton color="inherit" aria-label="open drawer" sx={{ color: 'black' }}>
             <MenuIcon />
           </IconButton>
-          <StyledFab  aria-label="add">
+          <StyledFab aria-label="add">
             <AddIcon />
           </StyledFab>
           <Box sx={{ flexGrow: 1 }} />

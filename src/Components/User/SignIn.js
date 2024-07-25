@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useUser } from '../../Hooks/useUser';
+import { useNavigate } from 'react-router-dom';
 
 function Copyright(props) {
   return (
@@ -34,8 +35,8 @@ export default function SignIn() {
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
-  const { loading, error, loginUser } = useUser(); 
-
+  const { loading, error, loginUser } = useUser();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsEmailValid(validateEmail(email));
@@ -61,17 +62,16 @@ export default function SignIn() {
     const userData = {
       email: data.get('email'),
       password: data.get('password'),
-    
     };
     try {
       const response = await loginUser(userData);
-      console.log("res",response);
-      // if (response.status === 'success') {
-      // }
+      if (response.status === 'success') {
+        navigate('/home');
+
+      }
     } catch (error) {
-      console.error('Error sending OTP:', error);
+      console.error('Error logging in:', error);
     }
-   
   };
 
   return (
@@ -126,10 +126,15 @@ export default function SignIn() {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
-              disabled={!isFormValid}
+              disabled={!isFormValid || loading}
             >
-              Sign In
+              {loading ? 'Loading...' : 'Sign In'}
             </Button>
+            {error && (
+              <Typography color="error" sx={{ mt: 2 }}>
+                {error}
+              </Typography>
+            )}
             <Grid container>
               <Grid item>
                 <Link href="/register" variant="body2">
