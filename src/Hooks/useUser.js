@@ -105,6 +105,7 @@ export const useUser = () => {
     error,
     sendOtp,
     verifyOtp,
-    loginUser
+    loginUser,
+    logoutUser
   };
 };

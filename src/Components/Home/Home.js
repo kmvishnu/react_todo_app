@@ -16,9 +16,13 @@ import ListSubheader from '@mui/material/ListSubheader';
 import Avatar from '@mui/material/Avatar';
 import MenuIcon from '@mui/icons-material/Menu';
 import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import MoreIcon from '@mui/icons-material/MoreVert';
+import Popover from '@mui/material/Popover';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../Hooks/useUser';
+
 
 const messages = [
   {
@@ -82,8 +86,49 @@ const StyledFab = styled(Fab)({
   },
 });
 
+const StyledPopoverContent = styled(Box)({
+  padding: '16px',
+  textAlign: 'center',
+  minWidth: '200px',
+});
+
+const StyledAvatar = styled(Avatar)({
+  margin: '0 auto 8px',
+  width: '60px',
+  height: '60px',
+});
+
+const StyledButton = styled(Button)({
+  marginTop: '16px',
+  backgroundColor: '#f50057',
+  '&:hover': {
+    backgroundColor: '#c51162',
+  },
+});
+
 export default function Home() {
-  const name = useSelector((state) => state.user.name);
+  const name = useSelector((state) => state.user.user);
+  const { logoutUser } = useUser();
+  const navigate = useNavigate();
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    logoutUser();
+    navigate('/login');
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
+
   return (
     <React.Fragment>
       <CssBaseline />
@@ -119,7 +164,7 @@ export default function Home() {
       </Paper>
       <AppBar position="fixed" sx={{ top: 'auto', bottom: 0, bgcolor: 'white' }}>
         <Toolbar>
-          <IconButton color="inherit" aria-label="open drawer" sx={{ color: 'black' }}>
+          <IconButton color="inherit" aria-label="open drawer" sx={{ color: 'black' }} onClick={handleMenuClick}>
             <MenuIcon />
           </IconButton>
           <StyledFab aria-label="add">
@@ -128,6 +173,30 @@ export default function Home() {
           <Box sx={{ flexGrow: 1 }} />
         </Toolbar>
       </AppBar>
+      <Popover
+        id={id}
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+      >
+        <StyledPopoverContent>
+          <StyledAvatar alt={name} src="/static/images/avatar/default-avatar.png" />
+          <Typography variant="h6">{name}</Typography>
+          <Typography variant="body2" color="textSecondary">Welcome back!</Typography>
+          <Divider sx={{ my: 2 }} />
+          <StyledButton variant="contained" onClick={handleLogout}>
+            Logout
+          </StyledButton>
+        </StyledPopoverContent>
+      </Popover>
     </React.Fragment>
   );
 }
