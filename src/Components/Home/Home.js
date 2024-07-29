@@ -57,7 +57,7 @@ export default function Home() {
 
   useEffect(() => {
     viewTodos();
-  }, []);
+  }, [viewTodos]);
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
