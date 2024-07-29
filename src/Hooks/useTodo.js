@@ -71,6 +71,29 @@ export const useTodo = () => {
     }
   }
 
+  const editTodo = async (data) => {
+    setLoading(true);
+    const payload = {
+      data: data,
+    };
+    try {
+      const response = await axios.put(`${config.apiBaseUrl}/v2/updateTodo`, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      return response;
+    } catch (error) {
+      console.error('Error updating todo', error);
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  
+
   useEffect(() => {
     viewTodos();
 }, []);
@@ -82,6 +105,7 @@ export const useTodo = () => {
     todos,
     addTodo,
     viewTodos,
-    deleteTodo
+    deleteTodo,
+    editTodo
   };
 };

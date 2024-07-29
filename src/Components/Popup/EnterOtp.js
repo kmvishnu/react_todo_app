@@ -1,4 +1,3 @@
-// src/components/Popup.js
 import React, { useState } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Button, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';

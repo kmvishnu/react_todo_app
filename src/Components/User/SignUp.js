@@ -12,8 +12,8 @@ import Link from '@mui/material/Link';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useDispatch } from 'react-redux';
 import { registerUser } from '../../features/user/userSlice';
-import { useUser } from '../../Hooks/useUser'; // Import the hook
-import EnterOtp from '../Popup/EnterOtp'; // Import the EnterOtp component
+import { useUser } from '../../Hooks/useUser';
+import EnterOtp from '../Popup/EnterOtp'; 
 
 function Copyright(props) {
   return (
@@ -38,9 +38,9 @@ export default function SignUp() {
   const [isNameValid, setIsNameValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
-  const [showEnterOtp, setShowEnterOtp] = useState(false); // State to manage EnterOtp visibility
+  const [showEnterOtp, setShowEnterOtp] = useState(false); 
 
-  const { loading, sendOtp, verifyOtp } = useUser(); // Use the hook
+  const { loading, sendOtp, verifyOtp } = useUser(); 
   const dispatch = useDispatch();
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -12,19 +12,31 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import AddIcon from "@mui/icons-material/Add";
 import { useTodo } from "../../Hooks/useTodo";
 
-const AddTodoDialog = ({ open, onClose, onSuccess }) => {
-  const [todo, setTodo] = useState("");
-  const [details, setDetails] = useState("");
-  const [constantTodo, setConstantTodo] = useState(false);
+const EditTodoDialog = ({ open, onClose, onSuccess, todoToEdit }) => {
+  const [todo, setTodo] = useState(todoToEdit?.name || "");
+  const [details, setDetails] = useState(todoToEdit?.details || "");
+  const [done, setDone] = useState(todoToEdit?.done || false);
+  const [constantTodo, setConstantTodo] = useState(
+    todoToEdit?.constant || false
+  );
+
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { addTodo, loading } = useTodo();
+  const { editTodo, loading } = useTodo();
+
+  useEffect(() => {
+    if (todoToEdit) {
+      setTodo(todoToEdit.name);
+      setDetails(todoToEdit.details);
+      setConstantTodo(todoToEdit.constant);
+      setDone(todoToEdit.done);
+    }
+  }, [todoToEdit]);
 
   const handleTodoChange = (event) => {
-    if (event.target.value.length <= 35) {
+    if (event.target.value.length <= 20) {
       setTodo(event.target.value);
     }
   };
@@ -40,19 +52,23 @@ const AddTodoDialog = ({ open, onClose, onSuccess }) => {
   const handleSubmit = async () => {
     if (todo.trim()) {
       try {
-        const res = await addTodo(todo, details);
+        const data = {
+          id: todoToEdit._id,
+          name: todo,
+          details: details,
+          done: done,
+          constant: constantTodo,
+        };
+        const res = await editTodo(data);
         if (res && res.status === 200) {
           setErrorMessage("");
-          setTodo("");
-          setDetails("");
-          setConstantTodo(false);
           onClose();
-          onSuccess(); 
+          onSuccess();
         } else {
-          setErrorMessage("Failed to add todo. Please try again.");
+          setErrorMessage("Failed to edit todo. Please try again.");
         }
       } catch (error) {
-        setErrorMessage("Failed to add todo. Please try again.");
+        setErrorMessage("Failed to edit todo. Please try again.");
       }
     }
   };
@@ -61,7 +77,7 @@ const AddTodoDialog = ({ open, onClose, onSuccess }) => {
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <div>Add Todo</div>
+          <div>Edit Todo</div>
           <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>
@@ -78,8 +94,8 @@ const AddTodoDialog = ({ open, onClose, onSuccess }) => {
           variant="standard"
           value={todo}
           onChange={handleTodoChange}
-          helperText={`${todo.length}/35`}
-          error={todo.length === 35}
+          helperText={`${todo.length}/20`}
+          error={todo.length === 20}
         />
         <TextField
           margin="dense"
@@ -116,8 +132,7 @@ const AddTodoDialog = ({ open, onClose, onSuccess }) => {
             onClick={handleSubmit}
             disabled={!todo.trim() || loading}
           >
-            <AddIcon />
-            {loading ? "Adding..." : "Add"}
+            {loading ? "Saving..." : "Save"}
           </Button>
         </Box>
       </DialogContent>
@@ -125,4 +140,4 @@ const AddTodoDialog = ({ open, onClose, onSuccess }) => {
   );
 };
 
-export default AddTodoDialog;
+export default EditTodoDialog;

@@ -25,6 +25,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../Hooks/useUser";
 import { useTodo } from "../../Hooks/useTodo";
+import { useMediaQuery } from "@mui/material";
 
 import {
   StyledFab,
@@ -34,7 +35,8 @@ import {
   ActionBox,
   ActionIconButton,
 } from "../../styles";
-import AddTodoDialog from "../Popup/AddTodoDialog"; // Import the new component
+import AddTodoDialog from "../Popup/AddTodoDialog";
+import EditTodoDialog from "../Popup/EditTodoDialog";
 
 export default function Home() {
   const name = useSelector((state) => state.user.user);
@@ -42,10 +44,14 @@ export default function Home() {
   const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const { deleteTodo,viewTodos, todos } = useTodo();
+  const { deleteTodo, viewTodos, editTodo, todos } = useTodo();
   const [actionAnchorEl, setActionAnchorEl] = useState(null);
   const [selectedTodo, setSelectedTodo] = useState(null);
-  const [addDialogOpen, setAddDialogOpen] = useState(false); // State for AddTodoDialog
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [todoToEdit, setTodoToEdit] = useState(null);
+
+  const isSmallScreen = useMediaQuery("(max-width:600px)");
 
   useEffect(() => {
     viewTodos();
@@ -73,17 +79,17 @@ export default function Home() {
     setActionAnchorEl(null);
     setSelectedTodo(null);
   };
+
   const handleActionDelete = async () => {
     try {
       const res = await deleteTodo(selectedTodo);
       if (res && res.status === 200) {
-
         viewTodos();
-      } 
+      }
     } catch (error) {
       console.log("Failed to delete todo. Please try again.");
     }
-  
+
     setActionAnchorEl(null);
     setSelectedTodo(null);
   };
@@ -97,7 +103,43 @@ export default function Home() {
   };
 
   const handleAddTodoSuccess = () => {
-    viewTodos(); // Fetch the latest todos after adding a new one
+    viewTodos();
+  };
+
+  const handleEditIconClick = (todo) => {
+    setTodoToEdit(todo);
+    setEditDialogOpen(true);
+    setActionAnchorEl(null);
+  };
+
+  const handleEditDialogClose = () => {
+    setEditDialogOpen(false);
+    setTodoToEdit(null);
+  };
+
+  const handleEditTodoSuccess = () => {
+    viewTodos();
+  };
+
+  const handleDoneToggle = async (todo) => {
+    try {
+      const updatedTodo = { ...todo, done: !todo.done };
+      const data = {
+        id: updatedTodo._id,
+        name: updatedTodo.name,
+        details: updatedTodo.details,
+        done: updatedTodo.done,
+        constant: updatedTodo.constant,
+      };
+      const res = await editTodo(data);
+      if (res && res.status === 200) {
+        viewTodos();
+      }
+    } catch (error) {
+      console.log("Failed to update todo. Please try again.");
+    }
+    setActionAnchorEl(null);
+    setSelectedTodo(null);
   };
 
   const open = Boolean(anchorEl);
@@ -105,6 +147,11 @@ export default function Home() {
 
   const actionOpen = Boolean(actionAnchorEl);
   const actionId = actionOpen ? "action-popover" : undefined;
+
+  const truncateText = (text, maxLength) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
+  };
 
   return (
     <React.Fragment>
@@ -132,38 +179,44 @@ export default function Home() {
             bgcolor: "background.paper",
           }}
         >
-          {todos.map((todo) => (
-            <React.Fragment key={todo._id}>
-              <TodoItem
-                secondaryAction={
-                  <IconButton
-                    edge="end"
-                    aria-label="more"
-                    onClick={(event) => handleActionClick(event, todo)}
-                  >
-                    <MoreVertIcon />
-                  </IconButton>
-                }
-                sx={{
-                  mb: 2, // Margin between each todo
-                }}
-              >
-                <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: "#3f51b5" }}>
-                    <Typography variant="caption" color="white">
-                      {todo.name.charAt(0)}
-                    </Typography>
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={todo.name}
-                  secondary={
-                    <React.Fragment>{` - ${todo.details}`}</React.Fragment>
+          {todos
+            .filter((todo) => !todo.done)
+            .concat(todos.filter((todo) => todo.done))
+            .map((todo) => (
+              <React.Fragment key={todo._id}>
+                <TodoItem
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      aria-label="more"
+                      onClick={(event) => handleActionClick(event, todo)}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
                   }
-                />
-              </TodoItem>
-            </React.Fragment>
-          ))}
+                  sx={{
+                    mb: 2,
+                    opacity: todo.done ? 0.5 : 1,
+                    textDecoration: todo.done ? "line-through" : "none",
+                  }}
+                >
+                  <ListItemAvatar>
+                    <Avatar sx={{ bgcolor: "#3f51b5" }}>
+                      <Typography variant="caption" color="white">
+                        {todo.name.charAt(0)}
+                      </Typography>
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={truncateText(todo.name, isSmallScreen ? 25 : 35)}
+                    secondary={truncateText(
+                      ` - ${todo.details}`,
+                      isSmallScreen ? 25 : 40
+                    )}
+                  />
+                </TodoItem>
+              </React.Fragment>
+            ))}
         </List>
       </Box>
       <AppBar
@@ -229,13 +282,19 @@ export default function Home() {
         }}
       >
         <ActionBox>
-          <ActionIconButton className="done" onClick={handleActionClose}>
+          <ActionIconButton
+            className="done"
+            onClick={() => handleDoneToggle(selectedTodo)}
+          >
             <DoneIcon />
           </ActionIconButton>
           <ActionIconButton className="view" onClick={handleActionClose}>
             <VisibilityIcon />
           </ActionIconButton>
-          <ActionIconButton className="edit" onClick={handleActionClose}>
+          <ActionIconButton
+            className="edit"
+            onClick={() => handleEditIconClick(selectedTodo)}
+          >
             <EditIcon />
           </ActionIconButton>
           <ActionIconButton className="delete" onClick={handleActionDelete}>
@@ -249,7 +308,13 @@ export default function Home() {
       <AddTodoDialog
         open={addDialogOpen}
         onClose={handleAddDialogClose}
-        onSuccess={handleAddTodoSuccess} // Pass the success callback
+        onSuccess={handleAddTodoSuccess}
+      />
+      <EditTodoDialog
+        open={editDialogOpen}
+        onClose={handleEditDialogClose}
+        onSuccess={handleEditTodoSuccess}
+        todoToEdit={todoToEdit}
       />
     </React.Fragment>
   );
