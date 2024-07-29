@@ -1,17 +1,20 @@
-import * as React from "react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import List from "@mui/material/List";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import Avatar from "@mui/material/Avatar";
+import React, { useState, useEffect } from "react";
+import {
+  AppBar,
+  Box,
+  Toolbar,
+  Typography,
+  IconButton,
+  List,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  Popover,
+  Divider,
+  Button,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AddIcon from "@mui/icons-material/Add";
-import Popover from "@mui/material/Popover";
-import Divider from "@mui/material/Divider";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
@@ -31,17 +34,22 @@ import {
   ActionBox,
   ActionIconButton,
 } from "../../styles";
-import { Button } from "@mui/material";
+import AddTodoDialog from "../Popup/AddTodoDialog"; // Import the new component
 
 export default function Home() {
   const name = useSelector((state) => state.user.user);
   const { logoutUser } = useUser();
   const navigate = useNavigate();
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const { todos } = useTodo();
-  const [actionAnchorEl, setActionAnchorEl] = React.useState(null);
-  const [selectedTodo, setSelectedTodo] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const { deleteTodo,viewTodos, todos } = useTodo();
+  const [actionAnchorEl, setActionAnchorEl] = useState(null);
+  const [selectedTodo, setSelectedTodo] = useState(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false); // State for AddTodoDialog
+
+  useEffect(() => {
+    viewTodos();
+  }, []);
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -64,6 +72,32 @@ export default function Home() {
   const handleActionClose = () => {
     setActionAnchorEl(null);
     setSelectedTodo(null);
+  };
+  const handleActionDelete = async () => {
+    try {
+      const res = await deleteTodo(selectedTodo);
+      if (res && res.status === 200) {
+
+        viewTodos();
+      } 
+    } catch (error) {
+      console.log("Failed to delete todo. Please try again.");
+    }
+  
+    setActionAnchorEl(null);
+    setSelectedTodo(null);
+  };
+
+  const handleAddIconClick = () => {
+    setAddDialogOpen(true);
+  };
+
+  const handleAddDialogClose = () => {
+    setAddDialogOpen(false);
+  };
+
+  const handleAddTodoSuccess = () => {
+    viewTodos(); // Fetch the latest todos after adding a new one
   };
 
   const open = Boolean(anchorEl);
@@ -90,7 +124,7 @@ export default function Home() {
         Today
       </Typography>
 
-      <Box sx={{ padding: "20px" }}>
+      <Box sx={{ padding: "20px", pb: "80px" }}>
         <List
           sx={{
             width: "100%",
@@ -110,6 +144,9 @@ export default function Home() {
                     <MoreVertIcon />
                   </IconButton>
                 }
+                sx={{
+                  mb: 2, // Margin between each todo
+                }}
               >
                 <ListItemAvatar>
                   <Avatar sx={{ bgcolor: "#3f51b5" }}>
@@ -142,7 +179,7 @@ export default function Home() {
           >
             <MenuIcon />
           </IconButton>
-          <StyledFab aria-label="add">
+          <StyledFab aria-label="add" onClick={handleAddIconClick}>
             <AddIcon />
           </StyledFab>
           <Box sx={{ flexGrow: 1 }} />
@@ -201,7 +238,7 @@ export default function Home() {
           <ActionIconButton className="edit" onClick={handleActionClose}>
             <EditIcon />
           </ActionIconButton>
-          <ActionIconButton className="delete" onClick={handleActionClose}>
+          <ActionIconButton className="delete" onClick={handleActionDelete}>
             <DeleteIcon />
           </ActionIconButton>
           <ActionIconButton className="close" onClick={handleActionClose}>
@@ -209,6 +246,11 @@ export default function Home() {
           </ActionIconButton>
         </ActionBox>
       </Popover>
+      <AddTodoDialog
+        open={addDialogOpen}
+        onClose={handleAddDialogClose}
+        onSuccess={handleAddTodoSuccess} // Pass the success callback
+      />
     </React.Fragment>
   );
 }

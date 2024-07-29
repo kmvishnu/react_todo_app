@@ -27,6 +27,50 @@ export const useTodo = () => {
         setLoading(false);
     }
   }
+
+  const addTodo = async(name,details)=>{
+    setLoading(true);
+    const payload = {
+        "data":{
+            "name":name,
+            "details":details
+        }
+    }
+    try {
+        const response = await axios.post(`${config.apiBaseUrl}/v2/createTodo/`,payload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response
+    } catch (error) {
+        console.error('Error fetching brands', error);
+        setError(error);
+    } finally {
+        setLoading(false);
+    }
+  }
+
+  
+  const deleteTodo = async(todo)=>{
+    setLoading(true);
+    try {
+        const response = await axios.delete(`${config.apiBaseUrl}/v2/deleteTodo/${todo._id}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response
+    } catch (error) {
+        console.error('Error fetching brands', error);
+        setError(error);
+    } finally {
+        setLoading(false);
+    }
+  }
+
   useEffect(() => {
     viewTodos();
 }, []);
@@ -35,6 +79,9 @@ export const useTodo = () => {
   return {
     loading,
     error,
-    todos
+    todos,
+    addTodo,
+    viewTodos,
+    deleteTodo
   };
 };
