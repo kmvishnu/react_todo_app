@@ -36,13 +36,15 @@ const EditTodoDialog = ({ open, onClose, onSuccess, todoToEdit }) => {
   }, [todoToEdit]);
 
   const handleTodoChange = (event) => {
-    if (event.target.value.length <= 20) {
+    if (event.target.value.length <= 35) {
       setTodo(event.target.value);
     }
   };
 
   const handleDetailsChange = (event) => {
-    setDetails(event.target.value);
+    if (event.target.value.length <= 150) {
+        setDetails(event.target.value);
+      }
   };
 
   const handleConstantTodoChange = (event) => {
@@ -108,6 +110,8 @@ const EditTodoDialog = ({ open, onClose, onSuccess, todoToEdit }) => {
           variant="outlined"
           value={details}
           onChange={handleDetailsChange}
+          helperText={`${details.length}/150`}
+          error={details.length === 150}
         />
         <FormControlLabel
           control={

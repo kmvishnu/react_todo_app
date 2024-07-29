@@ -30,7 +30,9 @@ const AddTodoDialog = ({ open, onClose, onSuccess }) => {
   };
 
   const handleDetailsChange = (event) => {
-    setDetails(event.target.value);
+    if (event.target.value.length <= 150) {
+        setDetails(event.target.value);
+      }
   };
 
   const handleConstantTodoChange = (event) => {
@@ -92,6 +94,8 @@ const AddTodoDialog = ({ open, onClose, onSuccess }) => {
           variant="outlined"
           value={details}
           onChange={handleDetailsChange}
+          helperText={`${details.length}/150`}
+          error={details.length === 150}
         />
         <FormControlLabel
           control={

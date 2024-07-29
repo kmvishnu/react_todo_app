@@ -37,6 +37,7 @@ import {
 } from "../../styles";
 import AddTodoDialog from "../Popup/AddTodoDialog";
 import EditTodoDialog from "../Popup/EditTodoDialog";
+import ViewTodoDialog from "../Popup/viewTodoDialog";
 
 export default function Home() {
   const name = useSelector((state) => state.user.user);
@@ -49,6 +50,7 @@ export default function Home() {
   const [selectedTodo, setSelectedTodo] = useState(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [todoToEdit, setTodoToEdit] = useState(null);
 
   const isSmallScreen = useMediaQuery("(max-width:600px)");
@@ -119,6 +121,17 @@ export default function Home() {
 
   const handleEditTodoSuccess = () => {
     viewTodos();
+  };
+
+  const handleViewIconClick = (todo) => {
+    setSelectedTodo(todo);
+    setViewDialogOpen(true);
+    setActionAnchorEl(null);
+  };
+
+  const handleViewDialogClose = () => {
+    setViewDialogOpen(false);
+    setSelectedTodo(null);
   };
 
   const handleDoneToggle = async (todo) => {
@@ -288,7 +301,7 @@ export default function Home() {
           >
             <DoneIcon />
           </ActionIconButton>
-          <ActionIconButton className="view" onClick={handleActionClose}>
+          <ActionIconButton className="view" onClick={() => handleViewIconClick(selectedTodo)}>
             <VisibilityIcon />
           </ActionIconButton>
           <ActionIconButton
@@ -315,6 +328,11 @@ export default function Home() {
         onClose={handleEditDialogClose}
         onSuccess={handleEditTodoSuccess}
         todoToEdit={todoToEdit}
+      />
+      <ViewTodoDialog
+        open={viewDialogOpen}
+        onClose={handleViewDialogClose}
+        todo={selectedTodo}
       />
     </React.Fragment>
   );
