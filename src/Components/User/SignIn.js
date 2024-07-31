@@ -74,6 +74,10 @@ export default function SignIn() {
     }
   };
 
+  const handleNavigateToRegister = () => {
+    navigate('/register');
+  };
+
   return (
     <ThemeProvider theme={defaultTheme}>
       <Container component="main" maxWidth="xs">
@@ -137,9 +141,14 @@ export default function SignIn() {
             )}
             <Grid container>
               <Grid item>
-                <Link href="/register" variant="body2">
+                <Typography
+                  variant="body2"
+                  color="primary"
+                  sx={{ cursor: 'pointer' }}
+                  onClick={handleNavigateToRegister}
+                >
                   {"Don't have an account? Sign Up"}
-                </Link>
+                </Typography>
               </Grid>
             </Grid>
           </Box>
