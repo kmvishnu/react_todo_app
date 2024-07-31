@@ -14,6 +14,7 @@ import { useDispatch } from 'react-redux';
 import { registerUser } from '../../features/user/userSlice';
 import { useUser } from '../../Hooks/useUser';
 import EnterOtp from '../Popup/EnterOtp'; 
+import { useNavigate } from 'react-router-dom';
 
 function Copyright(props) {
   return (
@@ -39,6 +40,8 @@ export default function SignUp() {
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const [showEnterOtp, setShowEnterOtp] = useState(false); 
+  const navigate = useNavigate();
+
 
   const { loading, sendOtp, verifyOtp } = useUser(); 
   const dispatch = useDispatch();
@@ -84,6 +87,10 @@ export default function SignUp() {
     } catch (error) {
       console.error('Error sending OTP:', error);
     }
+  };
+
+  const handleNavigateToLogin = () => {
+    navigate('/login');
   };
 
   const handleVerifyOtp = async (email, otp) => {
@@ -173,11 +180,16 @@ export default function SignUp() {
             >
               {loading ? 'Loading...' : 'Sign Up'}
             </Button>
-            <Grid container justifyContent="flex-end">
+            <Grid container>
               <Grid item>
-                <Link href="/login" variant="body2">
-                  Already have an account? Sign in
-                </Link>
+                <Typography
+                  variant="body2"
+                  color="primary"
+                  sx={{ cursor: 'pointer' }}
+                  onClick={handleNavigateToLogin}
+                >
+                  {"Already have an account ? Sign In"}
+                </Typography>
               </Grid>
             </Grid>
           </Box>
