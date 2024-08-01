@@ -53,23 +53,23 @@ export default function Home() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [todoToEdit, setTodoToEdit] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const isSmallScreen = useMediaQuery("(max-width:600px)");
 
   useEffect(() => {
     const fetchTodos = async () => {
+      setLoading(true);
       await viewTodos();
-      if (todos.length === 0) {
-        setSnackbarOpen(true); 
-      }
+      setLoading(false);
     };
     fetchTodos();
-  }, [viewTodos, todos.length]);
+  }, [viewTodos]);
 
   useEffect(() => {
-    if (todos.length === 0) {
+    if (!loading && todos.length === 0) {
       setSnackbarOpen(true);
     }
-  }, [todos]);
+  }, [loading, todos]);
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -305,7 +305,7 @@ export default function Home() {
         }}
       >
         <ActionBox>
-          <ActionIconButton
+        <ActionIconButton
             className="done"
             onClick={() => handleDoneToggle(selectedTodo)}
           >
