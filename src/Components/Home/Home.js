@@ -63,7 +63,7 @@ export default function Home() {
       }
     };
     fetchTodos();
-  }, [viewTodos]);
+  }, [viewTodos, todos.length]);
 
   useEffect(() => {
     if (todos.length === 0) {
