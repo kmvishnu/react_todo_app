@@ -13,6 +13,7 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useUser } from '../../Hooks/useUser';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 function Copyright(props) {
   return (
@@ -37,6 +38,13 @@ export default function SignIn() {
   const [isFormValid, setIsFormValid] = useState(false);
   const { loading, error, loginUser } = useUser();
   const navigate = useNavigate();
+  const token = useSelector((state) => state.user.token);
+
+  useEffect(() => {
+    if (token) {
+      navigate('/home', { replace: true });
+    }
+  }, [token, navigate]);
 
   useEffect(() => {
     setIsEmailValid(validateEmail(email));
@@ -66,8 +74,8 @@ export default function SignIn() {
     try {
       const response = await loginUser(userData);
       if (response.status === 'success') {
-        navigate('/home');
-
+        sessionStorage.setItem('isAuthenticated', 'true');
+        navigate('/home', { replace: true });
       }
     } catch (error) {
       console.error('Error logging in:', error);

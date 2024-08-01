@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Outlet } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode'; // Ensure correct import
 
 const isTokenValid = (token) => {
     try {
@@ -15,7 +15,7 @@ const isTokenValid = (token) => {
 
 const PrivateRoute = () => {
     const token = useSelector((state) => state.user.token);
-    return token && isTokenValid(token) ? <Outlet /> : <Navigate to="/login" />;
+    return token && isTokenValid(token) ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default PrivateRoute;

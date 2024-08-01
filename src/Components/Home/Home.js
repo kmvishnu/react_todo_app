@@ -12,6 +12,8 @@ import {
   Popover,
   Divider,
   Button,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AddIcon from "@mui/icons-material/Add";
@@ -26,7 +28,6 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../Hooks/useUser";
 import { useTodo } from "../../Hooks/useTodo";
 import { useMediaQuery } from "@mui/material";
-
 import {
   StyledFab,
   StyledPopoverContent,
@@ -43,7 +44,6 @@ export default function Home() {
   const name = useSelector((state) => state.user.user);
   const { logoutUser } = useUser();
   const navigate = useNavigate();
-
   const [anchorEl, setAnchorEl] = useState(null);
   const { deleteTodo, viewTodos, editTodo, todos } = useTodo();
   const [actionAnchorEl, setActionAnchorEl] = useState(null);
@@ -52,12 +52,24 @@ export default function Home() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [todoToEdit, setTodoToEdit] = useState(null);
-
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const isSmallScreen = useMediaQuery("(max-width:600px)");
 
   useEffect(() => {
-    viewTodos();
+    const fetchTodos = async () => {
+      await viewTodos();
+      if (todos.length === 0) {
+        setSnackbarOpen(true); 
+      }
+    };
+    fetchTodos();
   }, [viewTodos]);
+
+  useEffect(() => {
+    if (todos.length === 0) {
+      setSnackbarOpen(true);
+    }
+  }, [todos]);
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -91,7 +103,6 @@ export default function Home() {
     } catch (error) {
       console.log("Failed to delete todo. Please try again.");
     }
-
     setActionAnchorEl(null);
     setSelectedTodo(null);
   };
@@ -157,7 +168,6 @@ export default function Home() {
 
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
-
   const actionOpen = Boolean(actionAnchorEl);
   const actionId = actionOpen ? "action-popover" : undefined;
 
@@ -334,6 +344,19 @@ export default function Home() {
         onClose={handleViewDialogClose}
         todo={selectedTodo}
       />
+
+    
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} // Set Snackbar position
+        sx={{ marginBottom: '80px' }} // Adjust bottom margin to position above the Add button
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity="info" sx={{ width: '100%' }}>
+          Add todos by clicking on the + button
+        </Alert>
+      </Snackbar>
     </React.Fragment>
   );
 }
