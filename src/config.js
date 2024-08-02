@@ -1,6 +1,6 @@
 const config = {
     
-    apiBaseUrl:'https://backenddeploy-8r23.onrender.com'
+    apiBaseUrl:'https://backenddeploy-production-dcee.up.railway.app'
   };
   
   export default config;
