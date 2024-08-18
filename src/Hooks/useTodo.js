@@ -1,23 +1,18 @@
-import axios from 'axios';
-import config from '../config';
 import { useState, useEffect, useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import api from '../Components/Common/axios';
 
 export const useTodo = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [todos, setTodos] = useState([]);
-
-  const token = useSelector((state) => state.user.token);
+  const dispatch = useDispatch();
 
   const viewTodos = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${config.apiBaseUrl}/v2/viewAllTodos/`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+      const response = await api.get('/v2/viewAllTodos/', {
+        dispatch, // Pass the dispatch function in the config
       });
       setTodos(response.data);
     } catch (error) {
@@ -26,22 +21,19 @@ export const useTodo = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [dispatch]);
 
   const addTodo = async (name, details) => {
     setLoading(true);
     const payload = {
       data: {
-        name: name,
-        details: details,
+        name,
+        details,
       },
     };
     try {
-      const response = await axios.post(`${config.apiBaseUrl}/v2/createTodo/`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+      const response = await api.post('/v2/createTodo/', payload, {
+        dispatch, // Pass the dispatch function in the config
       });
       return response;
     } catch (error) {
@@ -55,11 +47,8 @@ export const useTodo = () => {
   const deleteTodo = async (todo) => {
     setLoading(true);
     try {
-      const response = await axios.delete(`${config.apiBaseUrl}/v2/deleteTodo/${todo._id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+      const response = await api.delete(`/v2/deleteTodo/${todo._id}`, {
+        dispatch, // Pass the dispatch function in the config
       });
       return response;
     } catch (error) {
@@ -73,14 +62,11 @@ export const useTodo = () => {
   const editTodo = async (data) => {
     setLoading(true);
     const payload = {
-      data: data,
+      data,
     };
     try {
-      const response = await axios.put(`${config.apiBaseUrl}/v2/updateTodo`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+      const response = await api.put('/v2/updateTodo', payload, {
+        dispatch, // Pass the dispatch function in the config
       });
       return response;
     } catch (error) {

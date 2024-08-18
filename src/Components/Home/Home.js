@@ -28,6 +28,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../Hooks/useUser";
 import { useTodo } from "../../Hooks/useTodo";
 import { useMediaQuery } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 import {
   StyledFab,
   StyledPopoverContent,
@@ -193,8 +194,12 @@ export default function Home() {
       >
         Today
       </Typography>
-
-      <Box sx={{ padding: "20px", pb: "80px" }}>
+      {loading ? (
+      <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+        <CircularProgress />
+      </Box>
+    ) :
+     ( <Box sx={{ padding: "20px", pb: "80px" }}>
         <List
           sx={{
             width: "100%",
@@ -241,7 +246,7 @@ export default function Home() {
               </React.Fragment>
             ))}
         </List>
-      </Box>
+      </Box>)}
       <AppBar
         position="fixed"
         sx={{ top: "auto", bottom: 0, bgcolor: "white" }}

@@ -3,7 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 import config from '../config';
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setToken, clearToken } from '../features/user/userSlice';
+import { setToken, clearToken, setAuthToken } from '../features/user/userSlice';
 
 export const useUser = () => {
   const [loading, setLoading] = useState(false);
@@ -26,12 +26,14 @@ export const useUser = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const refreshToken = localStorage.getItem('refreshToken');
     const user = localStorage.getItem('user');
-    if (token && user && isTokenValid(token)) {
-      dispatch(setToken({ token, user: JSON.parse(user) }));
+    if (token && refreshToken && user && isTokenValid(token)) {
+      dispatch(setToken({ token,refreshToken, user: JSON.parse(user) }));
     } else {
       dispatch(clearToken());
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
     }
   }, [dispatch]);
@@ -41,10 +43,11 @@ export const useUser = () => {
     setError(null);
     try {
       const response = await axios.post(`${config.apiBaseUrl}/v2/login`, userData);
-      const { token, name } = response.data;
+      const { token, name, refreshToken } = response.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(name));
-      dispatch(setToken({ token, name }));
+      dispatch(setToken({ token, name, refreshToken }));
       setLoading(false);
       return response.data;
     } catch (error) {
@@ -58,6 +61,7 @@ export const useUser = () => {
   const logoutUser = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('refreshToken');
     dispatch(clearToken());
   };
 
@@ -99,6 +103,23 @@ export const useUser = () => {
 
   };
 
+  const refreshToken = async (dispatch, refreshToken) => {
+    try {
+      const response = await axios.post(`${config.apiBaseUrl}/v2/refreshToken`, { refreshToken: refreshToken });
+      const { token } = response.data;
+      localStorage.removeItem('token');
+      localStorage.setItem('token', token);
+      dispatch(setAuthToken({ token, refreshToken }));
+      return token;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      dispatch(clearToken());
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+    }
+  };
+
 
   return {
     loading,
@@ -106,6 +127,7 @@ export const useUser = () => {
     sendOtp,
     verifyOtp,
     loginUser,
-    logoutUser
+    logoutUser,
+    refreshToken
   };
 };

@@ -1,13 +1,18 @@
-// src/App.js
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import Home from './Components/Home/Home';
-import PrivateRoute from './Components/Common/PrivateRoute';
-import { clearToken } from './features/user/userSlice';
-import { jwtDecode } from 'jwt-decode';
-import SignIn from './Components/User/SignIn';
-import SignUp from './Components/User/SignUp';
+import React, { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import Home from "./Components/Home/Home";
+import PrivateRoute from "./Components/Common/PrivateRoute";
+import { clearToken } from "./features/user/userSlice";
+import { jwtDecode } from "jwt-decode";
+import SignIn from "./Components/User/SignIn";
+import SignUp from "./Components/User/SignUp";
+import { useUser } from "./Hooks/useUser";
 
 const isTokenValid = (token) => {
   try {
@@ -22,18 +27,22 @@ const isTokenValid = (token) => {
 function App() {
   const dispatch = useDispatch();
   const token = useSelector((state) => state.user.token);
+  const refreshTokenValue = useSelector((state) => state.user.refreshToken);
+  const { refreshToken } = useUser();
 
   useEffect(() => {
+    
     const interval = setInterval(() => {
-      if (token && !isTokenValid(token)) {
+      if (token && !isTokenValid(token) && refreshTokenValue) {
+        refreshToken(dispatch, refreshTokenValue);
+      } else if (!refreshTokenValue) {
         dispatch(clearToken());
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        localStorage.clear();
       }
-    }, 60000); // Check every 60 seconds
+    }, 60000);
 
     return () => clearInterval(interval);
-  }, [token, dispatch]);
+  }, [token, refreshTokenValue, dispatch, refreshToken]);
 
   return (
     <Router>
