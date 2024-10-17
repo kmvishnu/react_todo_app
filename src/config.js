@@ -1,6 +1,6 @@
 const config = {
     
-    apiBaseUrl:'https://backenddeploy-production-dcee.up.railway.app'
+    apiBaseUrl:'https://today-backend-production.up.railway.app'
   };
   
   export default config;
