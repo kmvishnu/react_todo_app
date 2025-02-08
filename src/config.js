@@ -1,6 +1,6 @@
 const config = {
     
-  apiBaseUrl:'https://today-backend-4ilg.onrender.com'
+  apiBaseUrl:'innocent-judi-webworms-6de02c73.koyeb.app'
 };
 
 export default config;
